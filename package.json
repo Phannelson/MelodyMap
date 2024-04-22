@@ -10,10 +10,12 @@
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
+		"@rollup/plugin-replace": "^5.0.5",
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@types/eslint": "^8.56.7",
+		"dotenv": "^16.4.5",
 		"eslint": "^9.0.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.36.0",
@@ -21,7 +23,8 @@
 		"prettier": "^3.1.1",
 		"prettier-plugin-svelte": "^3.1.2",
 		"svelte": "^4.2.7",
-		"vite": "^5.0.3"
+		"vite": "^5.0.3",
+		"vite-plugin-env": "^1.0.1"
 	},
 	"type": "module",
 	"dependencies": {

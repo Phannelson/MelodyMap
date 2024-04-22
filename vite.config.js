@@ -1,7 +1,11 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
+import dotenv from 'dotenv'; // Import dotenv plugin
+
+dotenv.config(); // Load environment variables from .env file
 
 export default defineConfig({
-	plugins: [sveltekit()],
-	ssr: {noExternal: ['@googlemaps/js-api-loader'] }
+    plugins: [sveltekit()],
+    // other configurations...
 });
+

@@ -1,10 +1,12 @@
 <script>
+	export let title = 'Melody Map';
 	import { browser } from '$app/environment';
 	// this is not really public. but since it must be used on the client,
 	// it needs to be restricted via the Cloud Console (probably by domain)
 	
-	// import { PUBLIC_GOOGLE_MAPS_API_KEY } from '$env/static/public';
-	const PUBLIC_GOOGLE_MAPS_API_KEY = 'AIzaSyC36so9VWdytxATiPdwbwR7izt-Uqz7OZE';
+	// src/components/MapComponent.svelte
+	const PUBLIC_GOOGLE_MAPS_API_KEY = import.meta.env.VITE_PUBLIC_GOOGLE_MAPS_API_KEY;
+	console.log('API Key:', PUBLIC_GOOGLE_MAPS_API_KEY);
 
 
 	// Dynamically loaded constructors from Google Maps API
@@ -39,11 +41,17 @@
 	let lat;
 	let lng;
 	function get_current_position() {
-		navigator.geolocation.getCurrentPosition((position) => {
-			lat = position.coords.latitude;
-			lng = position.coords.longitude;
-		});
-	}
+    navigator.geolocation.getCurrentPosition((position) => {
+        lat = position.coords.latitude;
+        lng = position.coords.longitude;
+
+        // Move the map to the current position
+        map_object.setCenter({ lat, lng });
+    }, (error) => {
+        console.error('Error getting current position:', error);
+    });
+}
+
 	function get_center() {
 		const lat_lng_obj = map_object.getCenter();
 		({ lat, lng } = lat_lng_obj.toJSON());
@@ -62,6 +70,11 @@
 		});
 	}
 </script>
+
+<svelte:head>
+    <title>{title}</title> <!-- Title in +page.svelte -->
+</svelte:head>
+
 
 <div id="map"></div>
 <br />
