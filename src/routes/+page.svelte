@@ -1,13 +1,10 @@
 <script>
+	import Navbar from '$lib/components/Navbar.svelte';
 	export let title = 'Melody Map';
-	import { browser } from '$app/environment';
-	// this is not really public. but since it must be used on the client,
-	// it needs to be restricted via the Cloud Console (probably by domain)
-	
-	// src/components/MapComponent.svelte
-	const PUBLIC_GOOGLE_MAPS_API_KEY = import.meta.env.VITE_PUBLIC_GOOGLE_MAPS_API_KEY;
-	console.log('API Key:', PUBLIC_GOOGLE_MAPS_API_KEY);
 
+	import { browser } from '$app/environment';
+	
+	const PUBLIC_GOOGLE_MAPS_API_KEY = import.meta.env.VITE_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 	// Dynamically loaded constructors from Google Maps API
 	let Map;
@@ -38,8 +35,14 @@
 		})();
 	}
 
+	// Define initial lat and lng as null or other initial values
 	let lat;
 	let lng;
+
+	function clearCoordinates() {
+ 		lat = null;
+  		lng = null;
+}
 	function get_current_position() {
     navigator.geolocation.getCurrentPosition((position) => {
         lat = position.coords.latitude;
@@ -53,9 +56,11 @@
 }
 
 	function get_center() {
-		const lat_lng_obj = map_object.getCenter();
+		clearCoordinates(); // Clear the coordinates first
+		const lat_lng_obj = map_object.getCenter(); // Get the center of the map
 		({ lat, lng } = lat_lng_obj.toJSON());
 	}
+	
 	function set_center() {
 		console.log('Setting center to', lat, lng);
 		map_object.setCenter({ lat: parseFloat(lat), lng: parseFloat(lng) });
@@ -70,13 +75,16 @@
 		});
 	}
 </script>
+<Navbar />
 
 <svelte:head>
     <title>{title}</title> <!-- Title in +page.svelte -->
 </svelte:head>
 
+<div id="map-container">
+	<div id="map"></div>
+</div>
 
-<div id="map"></div>
 <br />
 <label for="lat">Latitude:<input name="lat" type="text" bind:value={lat} /></label>
 <label for="lng">Longitude:<input name="lng" type="text" bind:value={lng} /></label>
@@ -93,5 +101,9 @@
 <style>
 	#map {
 		height: 600px;
+	}
+
+	#map-container {
+		size: 80%;
 	}
 </style>
