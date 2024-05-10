@@ -80,8 +80,8 @@
   }
 
   nav{
-    position: fixed; /* Fixed Sidebar (stay in place on scroll and position relative to viewport) */
-    z-index: 99;
+    /* Fixed Sidebar (stay in place on scroll and position relative to viewport) */
+    z-index: 99; /* Stay on top */
     width: 100%;
     height: 78px;
 
@@ -135,6 +135,8 @@
     opacity: 0;
     visibility: hidden;
     box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+    z-index: 1;
+
   }
   .nav-links li:hover .drop-menu,
   .nav-links li:hover .drop-menu2{
@@ -158,6 +160,7 @@
     top: 85px;
     opacity: 0;
     visibility: hidden;
+    z-index: 1;
   }
   .drop-menu2 .content{
     background: #242526;
