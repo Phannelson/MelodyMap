@@ -1,109 +1,152 @@
 <script>
-	import Navbar from '$lib/components/Navbar.svelte';
-	export let title = 'Melody Map';
+    import Navbar from '$lib/components/Navbar.svelte';
+    export let title = 'Melody Map';
 
-	import { browser } from '$app/environment';
-	
-	const PUBLIC_GOOGLE_MAPS_API_KEY = import.meta.env.VITE_PUBLIC_GOOGLE_MAPS_API_KEY;
+    import { browser } from '$app/environment';
+    import pkg from 'ngeohash';
+	const { encode } = pkg;
 
-	// Dynamically loaded constructors from Google Maps API
-	let Map;
-	let Marker;
+    const PUBLIC_GOOGLE_MAPS_API_KEY = import.meta.env.VITE_PUBLIC_GOOGLE_MAPS_API_KEY;
+    const TICKETMASTER_API_KEY = import.meta.env.VITE_TICKETMASTER_API_KEY;
 
-	let map_object; // the Google Maps object
-	let map_element; // the DOM element
+    let Map, Marker;
+    let map_object; // the Google Maps object
+    let map_element; // the DOM element
 
-	const initialMapDisplayOptions = {
-		zoom: 8,
-		center: { lat: 35, lng: -110 },
-		mapId: 'SAMPLE_MAP_ID'
-	};
+    const initialMapDisplayOptions = {
+        zoom: 8,
+        center: { lat: 35, lng: -110 },
+        mapId: 'SAMPLE_MAP_ID'
+    };
 
-	// "document" only exists in the browser; maps are client-side only
-	if (browser) {
-		((g) => { var h, a, k, p = 'The Google Maps JavaScript API', c = 'google', l = 'importLibrary', q = '__ib__', m = document, b = window; b = b[c] || (b[c] = {}); var d = b.maps || (b.maps = {}), r = new Set(), e = new URLSearchParams(), u = () => h || (h = new Promise(async (f, n) => { await (a = m.createElement('script')); e.set('libraries', [...r] + ''); for (k in g) e.set( k.replace(/[A-Z]/g, (t) => '_' + t[0].toLowerCase()), g[k] ); e.set('callback', c + '.maps.' + q); a.src = `https://maps.${c}apis.com/maps/api/js?` + e; d[q] = f; a.onerror = () => (h = n(Error(p + ' could not load.'))); a.nonce = m.querySelector('script[nonce]')?.nonce || ''; m.head.append(a); })); d[l] ? console.warn(p + ' only loads once. Ignoring:', g) : (d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n))); })({
-			key: PUBLIC_GOOGLE_MAPS_API_KEY,
-			v: 'weekly'
-		});
-		map_element = document.getElementById('map');
+    if (browser) {
+        // Ensure the Google Maps script is loaded before using any maps functionality
+        loadGoogleMapsAPI().then(() => {
+            map_element = document.getElementById('map');
+            initializeMap();
+        });
+    }
 
-		(async () => {
-			({ Map } = await google.maps.importLibrary('maps'));
-			({ Marker } = await google.maps.importLibrary('marker'));
+    async function loadGoogleMapsAPI() {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${PUBLIC_GOOGLE_MAPS_API_KEY}&callback=initMap`;
+            script.async = true;
+            window.initMap = () => resolve();
+            script.onerror = () => reject(new Error('Google Maps API failed to load'));
+            document.head.appendChild(script);
+        });
+    }
 
-			map_object = new Map(map_element, initialMapDisplayOptions);
-		})();
-	}
+    async function initializeMap() {
+        await window.initMap; // Ensure the global initMap callback has been invoked
+        Map = google.maps.Map;
+        Marker = google.maps.Marker;
 
-	// Define initial lat and lng as null or other initial values
-	let lat;
-	let lng;
+        map_object = new Map(map_element, initialMapDisplayOptions);
+    }
 
-	function clearCoordinates() {
- 		lat = null;
-  		lng = null;
-}
-	function get_current_position() {
-    navigator.geolocation.getCurrentPosition((position) => {
-        lat = position.coords.latitude;
-        lng = position.coords.longitude;
+    let lat, lng;
 
-        // Move the map to the current position
-        map_object.setCenter({ lat, lng });
-    }, (error) => {
-        console.error('Error getting current position:', error);
-    });
-}
+    function clearCoordinates() {
+        lat = null;
+        lng = null;
+    }
 
-	function get_center() {
-		clearCoordinates(); // Clear the coordinates first
-		const lat_lng_obj = map_object.getCenter(); // Get the center of the map
-		({ lat, lng } = lat_lng_obj.toJSON());
-	}
-	
-	function set_center() {
-		console.log('Setting center to', lat, lng);
-		map_object.setCenter({ lat: parseFloat(lat), lng: parseFloat(lng) });
-	}
+    function get_current_position() {
+        navigator.geolocation.getCurrentPosition((position) => {
+            lat = position.coords.latitude;
+            lng = position.coords.longitude;
 
-	let markerText = 'Hello, World!';
-	function create_marker() {
-		const marker = new Marker({
-			map: map_object,
-			position: { lat: parseFloat(lat), lng: parseFloat(lng) },
-			title: markerText
-		});
-	}
+            map_object.setCenter({ lat, lng });
+            fetchMusicEvents(lat, lng);
+        }, (error) => {
+            console.error('Error getting current position:', error);
+        });
+    }
+
+    function get_center() {
+        clearCoordinates();
+        const lat_lng_obj = map_object.getCenter();
+        ({ lat, lng } = lat_lng_obj.toJSON());
+    }
+
+    function set_center() {
+        console.log('Setting center to', lat, lng);
+        map_object.setCenter({ lat: parseFloat(lat), lng: parseFloat(lng) });
+    }
+
+    function fetchMusicEvents(latitude, longitude) {
+        const geoHash = calculateGeoHash(latitude, longitude);
+        const concertEndpoint = `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${TICKETMASTER_API_KEY}&keyword=music&radius=50&locale=*&geoPoint=${geoHash}`;
+
+        fetch(concertEndpoint)
+            .then(response => response.json())
+            .then(data => {
+                processConcertData(data);
+            })
+            .catch(error => {
+                console.error('Error fetching concert data:', error);
+            });
+    }
+
+    function calculateGeoHash(latitude, longitude) {
+        return encode(latitude, longitude, 5); // GeoHash precision
+    }
+
+    let markerText = 'Marker';
+    function create_marker(lat, lng, title) {
+        new Marker({
+            map: map_object,
+            position: { lat: parseFloat(lat), lng: parseFloat(lng) },
+            title: title
+        });
+    }
+
+    function processConcertData(data) {
+        if (!data || !data._embedded || !data._embedded.events) {
+            console.error('No events found in the data.');
+            return;
+        }
+
+        data._embedded.events.forEach(event => {
+            const { venues } = event._embedded;
+            if (venues && venues.length > 0) {
+                const venue = venues[0];
+                const latitude = parseFloat(venue.location.latitude);
+                const longitude = parseFloat(venue.location.longitude);
+                create_marker(latitude, longitude, event.name);
+            }
+        });
+    }
 </script>
 <Navbar />
 
 <svelte:head>
-    <title>{title}</title> <!-- Title in +page.svelte -->
+    <title>{title}</title>
 </svelte:head>
 
 <div id="map-container">
-	<div id="map"></div>
+    <div id="map"></div>
 </div>
 
 <br />
 <label for="lat">Latitude:<input name="lat" type="text" bind:value={lat} /></label>
 <label for="lng">Longitude:<input name="lng" type="text" bind:value={lng} /></label>
 <br />
-<button on:click={() => get_current_position()}>Get Current Position</button>
-<button on:click={() => get_center()}>Get Map Center</button>
-<button on:click={() => set_center()}>Set Map Center</button>
+<button on:click={get_current_position}>Get Current Position</button>
+<button on:click={get_center}>Get Map Center</button>
+<button on:click={set_center}>Set Map Center</button>
 <br />
-<button on:click={() => create_marker()}>Create Marker</button>
-<label for="markerText"
-	>Marker text:<input name="markerText" type="text" bind:value={markerText} /></label
->
+<button on:click={() => create_marker(lat, lng, markerText)}>Create Marker</button>
+<label for="markerText">Marker text:<input name="markerText" type="text" bind:value={markerText} /></label>
 
 <style>
-	#map {
-		height: 600px;
-	}
-
-	#map-container {
-		size: 80%;
-	}
+    #map {
+        height: 600px;
+    }
+    #map-container {
+        width: 80%;
+        margin: auto;
+    }
 </style>

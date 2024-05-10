@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+      "target": "esnext",
+      "module": "esnext",
+      "strict": true,
+      "jsx": "preserve",
+      "importHelpers": true,
+      "moduleResolution": "node",
+      "skipLibCheck": true,
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+      "sourceMap": true,
+      "baseUrl": ".",
+      "paths": {
+        "$components/*": ["src/components/*"],
+        "$lib/*": ["src/lib/*"]
+      },
+      "lib": ["esnext", "dom"]
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules/*", "__sapper__/*", "public/*"]
+  }

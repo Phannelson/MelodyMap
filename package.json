@@ -11,11 +11,12 @@
 	},
 	"devDependencies": {
 		"@rollup/plugin-replace": "^5.0.5",
-		"@sveltejs/adapter-auto": "^3.0.0",
+		"@sveltejs/adapter-auto": "^3.2.0",
 		"@sveltejs/enhanced-img": "^0.2.0",
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@types/eslint": "^8.56.7",
+		"@types/ngeohash": "^0.6.8",
 		"dotenv": "^16.4.5",
 		"eslint": "^9.0.0",
 		"eslint-config-prettier": "^9.1.0",
@@ -24,11 +25,15 @@
 		"prettier": "^3.1.1",
 		"prettier-plugin-svelte": "^3.1.2",
 		"svelte": "^4.2.7",
+		"svelte-preprocess": "^5.1.4",
+		"typescript": "^5.4.5",
 		"vite": "^5.0.3",
 		"vite-plugin-env": "^1.0.1"
 	},
 	"type": "module",
 	"dependencies": {
-		"@googlemaps/js-api-loader": "^1.16.6"
+		"@googlemaps/js-api-loader": "^1.16.6",
+		"geohash": "^0.0.1",
+		"ngeohash": "^0.6.3"
 	}
 }
