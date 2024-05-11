@@ -17,6 +17,6 @@
       },
       "lib": ["esnext", "dom"]
     },
-    "include": ["src/**/*"],
+    "include": ["src/**/*", "vite-env.d.ts"],
     "exclude": ["node_modules/*", "__sapper__/*", "public/*"]
   }
