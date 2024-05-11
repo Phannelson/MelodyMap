@@ -1,3 +1,8 @@
+<script>
+    import Navbar from '$lib/components/Navbar.svelte';
+</script>
+<Navbar />
+
 <div>
     <h1>Sign up</h1>
     <form>
