@@ -16,7 +16,7 @@
         <h3>Nelson Phan</h3>
     </div>
     <div class="author">
-        <img src="blob.jpg" alt="Vivian Cao">
+        <img src="seal.jpg" alt="Vivian Cao">
         <h3>Vivian Cao</h3>
     </div>
 </div>
@@ -38,11 +38,11 @@
     }
     h1 {
         max-width: 80%;
-        transform: translateY(10%)
+        transform: translateY(60%)
     }
 
     h2 {
-        transform:translateY(60%)
+        transform:translateY(40%)
     }
 
     .authors {
