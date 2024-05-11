@@ -13,10 +13,11 @@
       "baseUrl": ".",
       "paths": {
         "$components/*": ["src/components/*"],
-        "$lib/*": ["src/lib/*"]
+        "$lib/*": ["src/lib/*"],
+        "$stores/*": ["src/stores/*"]
       },
       "lib": ["esnext", "dom"]
     },
-    "include": ["src/**/*", "vite-env.d.ts"],
+    "include": ["src/**/*", "vite-env.d.ts", "svelte.config.js"],
     "exclude": ["node_modules/*", "__sapper__/*", "public/*"]
   }
