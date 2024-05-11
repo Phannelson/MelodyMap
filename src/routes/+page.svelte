@@ -421,7 +421,7 @@ function calculateAndDisplayRoute(origin, destination) {
             <p>Info: Unavailable</p>
         {/if}
         <img src={selectedEventDetails.images[0].url} alt={selectedEventDetails.name} style="width: 100%; max-width: 300px;">
-        <p><a href={selectedEventDetails.url} target="_blank">More Info</a></p>
+        <p><a href={selectedEventDetails.url} target="_blank">Tickets</a></p>
     </div>
 {/if}
 
