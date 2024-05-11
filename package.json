@@ -33,6 +33,7 @@
 	"type": "module",
 	"dependencies": {
 		"@googlemaps/js-api-loader": "^1.16.6",
+		"firebase": "^10.11.1",
 		"geohash": "^0.0.1",
 		"ngeohash": "^0.6.3"
 	}
