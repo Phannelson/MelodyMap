@@ -1,15 +1,19 @@
 <script>
     import Navbar from '$lib/components/Navbar.svelte';
 </script>
+
 <Navbar />
+
 <div class="container">
     <h1>About Us</h1>
-    <h2>This site aims to help you find venues near you that has upcoming concerts.<br>
-        We want to make it easier for those who want to find a concert near them without <br>
-        the hassle of of going through each website of a venue to see if anyone is playing there. <br>
-        Why go through each venue when you can see the concerts in front of your screen.
-    </h2>
+    <p class="description">
+        This site aims to help you find venues near you that have upcoming concerts.
+        We want to make it easier for those who want to find a concert near them without
+        the hassle of going through each venue's website to see if anyone is playing there.
+        Why go through each venue when you can see the concerts right on your screen?
+    </p>
 </div>
+
 <div class="authors">
     <div class="author">
         <img src="blob.jpg" alt="Nelson Phan">
@@ -22,48 +26,75 @@
 </div>
 
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-    *{
+    @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+
+    * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: 'Prompt', sans-serif;
     }
+    
     .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 90vh;
-    text-align: center;
-    }
-    h1 {
-        max-width: 80%;
-        transform: translateY(60%)
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 90vh;
+        text-align: center;
     }
 
-    h2 {
-        transform:translateY(40%)
+    h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #333; /* Adjust color as needed */
+    }
+
+    .description {
+        font-size: 1.2rem;
+        line-height: 1.5;
+        max-width: 800px;
+        color: #666; /* Adjust color as needed */
     }
 
     .authors {
-        position: absolute;
-        width: 50%;
-        top: 70%; /* Adjust this value based on your layout */
-        text-align: center;
-        transform: translate(47%, -50%);
+        display: flex;
+        justify-content: center;
     }
+
     .author {
-        display: inline-block;
-        margin: 70px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0 1rem;
     }
+
     .author img {
-        width: 150px; /* Adjust size as needed */
+        width: 150px;
         height: 150px;
-        border-radius: 40%; /* Makes the image circular */
-        object-fit: cover; /* Ensures the image covers the area without distortion */
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 0.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
     }
+
     .author h3 {
-        margin-top: 20px;
+        font-size: 1.2rem;
+        color: #333; /* Adjust color as needed */
+    }
+
+    @keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+    .description{
+        animation: fadeIn 1s ease-in-out forwards;
+        opacity: 0; /* Start with opacity 0 */    
     }
 
 </style>
+

@@ -1,5 +1,6 @@
 <script>
     import Navbar from '$lib/components/Navbar.svelte';
+    import Greetings from '$lib/components/Greetings.svelte';
     export let title = 'Melody Map';
 
     import { browser } from '$app/environment';
@@ -14,6 +15,9 @@
     let Map, Marker, InfoWindow;
     let map_object; // the Google Maps object
     let map_element; // the DOM element
+    
+    let directionsService;
+    let directionsRenderer;
 
     const initialMapDisplayOptions = {
         zoom: 8,
@@ -41,16 +45,43 @@
     }
 
     async function initializeMap() {
-        await window.initMap; // Ensure the global initMap callback has been invoked
+        await window.initMap;
         Map = google.maps.Map;
         Marker = google.maps.Marker;
-		InfoWindow = google.maps.InfoWindow;
+        InfoWindow = google.maps.InfoWindow;
+
+        directionsService = new google.maps.DirectionsService();
+        directionsRenderer = new google.maps.DirectionsRenderer();
 
         map_object = new Map(map_element, initialMapDisplayOptions);
+        directionsRenderer.setMap(map_object);
     }
+
+    function onMapViewportChanged() {
+        const center = map_object.getCenter();
+        lat = center.lat();
+        lng = center.lng();
+
+        // Clear existing markers if necessary
+        clearMarkers();
+
+        // Fetch new events and update the list
+        fetchMusicEvents(lat, lng).then((data) => {
+            processConcertData(data);
+            updateConcertList(data);
+        });
+    }
+
+    function clearMarkers() {
+    for (let marker of concertMarkers) {
+        marker.setMap(null);
+    }
+    concertMarkers = []; // Reset the markers array
+}
 
     let lat, lng;
 
+    
     function clearCoordinates() {
         lat = null;
         lng = null;
@@ -70,17 +101,6 @@
         console.error('Error getting current position:', error);
     });
 }
-
-    function get_center() {
-        clearCoordinates();
-        const lat_lng_obj = map_object.getCenter();
-        ({ lat, lng } = lat_lng_obj.toJSON());
-    }
-
-    function set_center() {
-        console.log('Setting center to', lat, lng);
-        map_object.setCenter({ lat: parseFloat(lat), lng: parseFloat(lng) });
-    }
 
     function fetchMusicEvents(latitude, longitude) {
         const geoHash = calculateGeoHash(latitude, longitude);
@@ -105,6 +125,13 @@
 
 	// Define an array to store concert markers
 	let concertMarkers = [];
+    let openInfoWindow = null;
+
+    function showConcertList() {
+    const sidebarContainer = document.getElementById('sidebar-container');
+    sidebarContainer.style.display = 'block'; // Show the concert list container
+    console.log('Concert list shown'); // Debugging: Check if concert list is shown
+}
 
 	function create_marker(lat, lng, event) {
         const marker = new Marker({
@@ -114,6 +141,7 @@
         });
 
         marker.addListener('click', () => {
+        showConcertList(); // Show the concert list when a marker is clicked
         const infoWindowContent = document.createElement('div');
 		infoWindowContent.className = 'event-details'; // Apply the event-details class
 
@@ -139,14 +167,52 @@
 		infoWindowContent.appendChild(address);
 		infoWindowContent.appendChild(info);
 
-        const infoWindow = new InfoWindow({
-            content: infoWindowContent
+        // Add a button or link in your infoWindowContent that calls getDirections when clicked
+        const directionsButton = document.createElement('button');
+        directionsButton.textContent = 'Get Directions';
+        directionsButton.onclick = () => {
+            if (openInfoWindow) { 
+                openInfoWindow.close(); // Close the currently open info window
+            }
+            getDirections({ lat, lng });
+            // Toggle the visibility of the directions container
+            const directionsContainer = document.getElementById('directions-container');
+            if (directionsContainer.style.display === 'none') {
+                directionsContainer.style.display = 'block';
+            } else {
+                directionsContainer.style.display = 'none';
+            }
+        };
+
+        directionsButton.addEventListener('click', () => {
+                    // Toggle the visibility of the directions container
+            if (directionsContainer.style.display === 'none') {
+                directionsContainer.style.display = 'block';
+            } else {
+                directionsContainer.style.display = 'none';
+            }
         });
-        infoWindow.open(map_object, marker);
+
+        
+        infoWindowContent.appendChild(directionsButton);
+
+        const markerInfoWindow = new InfoWindow({
+        content: infoWindowContent
+    });
+
+        marker.addListener('click', () => {
+        if (openInfoWindow) {
+            openInfoWindow.close(); // Close the currently open info window
+        }
+        markerInfoWindow.open(map_object, marker);
+        openInfoWindow = markerInfoWindow; // Update openInfoWindow to this infoWindow
+    });
 
             selectedEventDetails = event; // For use in a detailed view if needed
         });
     }
+
+    
 
     function processConcertData(data) {
         if (!data || !data._embedded || !data._embedded.events) {
@@ -166,47 +232,143 @@
     }
 
 	function updateConcertList(data) {
-  const concertListElement = document.getElementById('concert-list-items');
-  concertListElement.innerHTML = ''; // Clear previous list
+        const concertListElement = document.getElementById('concert-list-items');
+        concertListElement.innerHTML = ''; // Clear previous list
 
-  const uniqueEventNames = new Set();
+        const uniqueEventNames = new Set();
 
-  data._embedded.events.forEach((event, index) => {
-    if (!uniqueEventNames.has(event.name)) {
-      const concertItem = document.createElement('li');
-	  concertItem.className = 'concert-item';
-		
-      const eventName = document.createElement('h2');
-      eventName.textContent = event.name; // Set event name as text content
-      concertItem.appendChild(eventName); // Add bold event name to li element
+        data._embedded.events.forEach((event, index) => {
+            if (!uniqueEventNames.has(event.name)) {
+            const concertItem = document.createElement('li');
+            concertItem.className = 'concert-item';
+                
+            const eventName = document.createElement('h2');
+            eventName.className = 'event-name';
+            eventName.textContent = event.name; // Set event name as text content
+            concertItem.appendChild(eventName); // Add bold event name to li element
 
-      const eventDetailDiv = document.createElement('div');
-      eventDetailDiv.className = 'event-details';
+            const eventDetailDiv = document.createElement('div');
+            eventDetailDiv.className = 'event-details';
 
-      const startDate = document.createElement('p');
-      startDate.textContent = `Date: ${event.dates.start.localDate}`;
-      eventDetailDiv.appendChild(startDate);
+            const startDate = document.createElement('p');
+            startDate.textContent = `Date: ${event.dates.start.localDate}`;
+            eventDetailDiv.appendChild(startDate);
 
-      const venueName = document.createElement('p');
-      venueName.textContent = `Venue: ${event._embedded.venues[0].name}`;
-      eventDetailDiv.appendChild(venueName);
+            const venueName = document.createElement('p');
+            venueName.textContent = `Venue: ${event._embedded.venues[0].name}`;
+            eventDetailDiv.appendChild(venueName);
 
-      const startDateTime = document.createElement('p');
-      startDateTime.textContent = `Time: ${event.dates.start.localTime}`;
-      eventDetailDiv.appendChild(startDateTime);
+            const startDateTime = document.createElement('p');
+            startDateTime.textContent = event.dates.start.localTime
+                ? `Time: ${event.dates.start.localTime}`
+                : 'Time: Unavailable';
+            eventDetailDiv.appendChild(startDateTime);
 
-	  const address = document.createElement('p');
-	  address.textContent = `Address: ${event._embedded.venues[0].address.line1}`;
-	  eventDetailDiv.appendChild(address);
+            const address = document.createElement('p');
+            address.textContent = `Address: ${event._embedded.venues[0].address.line1}`;
+            eventDetailDiv.appendChild(address);
 
-      concertItem.appendChild(eventDetailDiv);
-      concertListElement.appendChild(concertItem);
-      uniqueEventNames.add(event.name);
+            concertItem.appendChild(eventDetailDiv);
+            concertListElement.appendChild(concertItem);
+            uniqueEventNames.add(event.name);
+            }
+    });
+}
+
+function getDirections(destination) {
+    if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const origin = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                calculateAndDisplayRoute(origin, destination);
+            },
+            (error) => {
+                console.error('Error getting current position for directions:', error);
+            }
+        );
+    } else {
+        // Handle the case where the browser doesn't support geolocation
+        console.error('Geolocation is not supported by this browser.');
     }
-  });
+}
+
+function displayTravelDuration(directionsResult) {
+    const route = directionsResult.routes[0];
+    const duration = route.legs[0].duration.text;
+
+    const durationElement = document.getElementById('travel-duration');
+    durationElement.textContent = `Estimated Travel Time: ${duration}`;
+}
+
+
+function displayTravelDistance(directionsResult) {
+    const route = directionsResult.routes[0];
+    const distance = route.legs[0].distance.text;
+
+    const distanceElement = document.getElementById('travel-distance');
+    distanceElement.textContent = `Travel Distance: ${distance}`;
+}
+
+function calculateAndDisplayRoute(origin, destination) {
+    const request = {
+        origin: origin,
+        destination: destination,
+        travelMode: google.maps.TravelMode.DRIVING // You can change the travel mode
+    };
+
+    directionsService.route(request, function(response, status) {
+        if (status === 'OK') {
+            // Display the route on the map
+            directionsRenderer.setDirections(response);
+            // Extract and display the travel distance
+            displayTravelDistance(response);
+            displayTravelDuration(response);
+
+            // Clear previous directions content
+            const directionsContent = document.getElementById('directions-instructions');
+            directionsContent.innerHTML = '';
+
+            // Get the directions steps as an array
+            const steps = response.routes[0].legs[0].steps;
+
+            // Create the content for the directions pop-up
+            let directionsList = '<h3>Directions</h3><ol>';
+            for (let i = 0; i < steps.length; i++) {
+                directionsList += `<li>${steps[i].instructions}</li>`;
+            }
+            directionsList += '</ol>';
+
+            // Set the directions content in the designated element
+            directionsContent.innerHTML = directionsList;
+        } else {
+            window.alert('Directions request failed due to ' + status);
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const directionsContainer = document.getElementById('directions-container');
+    const getDirectionsBtn = document.getElementById('getDirectionsBtn');
+
+    // Hide the directions container by default
+    directionsContainer.style.display = 'none';
+
+    getDirectionsBtn.addEventListener('click', function() {
+        // Toggle the visibility of the directions container
+        if (directionsContainer.style.display === 'none') {
+            directionsContainer.style.display = 'block';
+        } else {
+            directionsContainer.style.display = 'none';
+        }
+    });
+});
+
 }
 
 </script>
+<Greetings/>
 <Navbar />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -216,11 +378,17 @@
 <svelte:head>
     <title>{title}</title>
 </svelte:head>
-<div id="map-container">
-    <div id="map"></div>
-</div>
 
-<br />
+<div id="app-container">
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+
+    <div id="sidebar-container">
+        <h2>Concerts</h2>
+        <ul id="concert-list-items"></ul>
+    </div>
+</div>
 
 	<div class="input-container">
 		<label for="lat">Latitude:</label>
@@ -230,28 +398,33 @@
 	</div>
 
 <button id="currentPositionBtn" on:click={get_current_position}>Get Current Position</button>
-<button id="mapCenterBtn" on:click={get_center}>Get Map Center</button>
-<button id="setCenterBtn" on:click={set_center}>Set Map Center</button>
-<button id="createMarkerBtn" on:click={() => fetchMusicEvents(lat, lng).then((event) => create_marker(lat, lng, event))}>Create Marker</button>
+<button id="searchAreaBtn" on:click={onMapViewportChanged}>Search in this area</button>
+<button id="clearCoordinatesBtn" on:click={clearCoordinates}>Clear Coordinates</button>
+
+
+<div id="directions-container" style="display: none;">
+    <div id="travel-distance"></div>
+    <div id="travel-duration"></div>
+    <div id="directions-instructions"></div>
+</div>
 
 
 {#if selectedEventDetails}
-	<div class="event-details">
-		<h2>{selectedEventDetails.name}</h2>
-		<p>Date: {selectedEventDetails.dates.start.localDate}</p>
-		<p>Venue: {selectedEventDetails._embedded.venues[0].name}</p>
-		<p>Address: {selectedEventDetails._embedded.venues[0].address.line1}</p>
-v		<p>Info: {selectedEventDetails.info}</p>
-		<img src={selectedEventDetails.images[0].url} alt={selectedEventDetails.name} style="width: 100%; max-width: 300px;">
-		<p><a href={selectedEventDetails.url} target="_blank">More Info</a> </p>
-	</div>	
+    <div class="event-details">
+        <h2>{selectedEventDetails.name}</h2>
+        <p>Date: {selectedEventDetails.dates.start.localDate}</p>
+        <p>Venue: {selectedEventDetails._embedded.venues[0].name}</p>
+        <p>Address: {selectedEventDetails._embedded.venues[0].address.line1}</p>
+        {#if selectedEventDetails.info}
+            <p>Info: {selectedEventDetails.info}</p>
+        {:else}
+            <p>Info: Unavailable</p>
+        {/if}
+        <img src={selectedEventDetails.images[0].url} alt={selectedEventDetails.name} style="width: 100%; max-width: 300px;">
+        <p><a href={selectedEventDetails.url} target="_blank">More Info</a></p>
+    </div>
 {/if}
 
-<!-- div for the concert list -->
-<div id="concert-list">
-	<h2>Concerts</h2>
-	<ul id="concert-list-items"></ul>
-  </div>
 
 
 <style>
@@ -259,7 +432,7 @@ v		<p>Info: {selectedEventDetails.info}</p>
 
 	:global {
   body {
-    background-color: #f0f0f0; /* Light blue */
+    background-color: #f0f0f0; 
   }
 }
 	.input-container {
@@ -269,6 +442,7 @@ v		<p>Info: {selectedEventDetails.info}</p>
     .input-container label {
         width: 60px;
         text-align: right;
+        margin-bottom: 30px;
     }
 
     .input-container input {
@@ -278,6 +452,7 @@ v		<p>Info: {selectedEventDetails.info}</p>
         border-radius: 4px;
         font-size: 16px;
 		margin-right: 36px;
+        transform: translate(0%, 10%);
     }
 
     /* Optional: Style for labels */
@@ -287,7 +462,7 @@ v		<p>Info: {selectedEventDetails.info}</p>
     }
 	
     #map {
-        height: 600px;
+        height: 640px;
 		margin-right: 20px;
 		border-radius: 10px;
 		margin-top: 10px;
@@ -298,9 +473,8 @@ v		<p>Info: {selectedEventDetails.info}</p>
     }
 		/* Style the buttons */
 	#currentPositionBtn,
-	#mapCenterBtn,
-	#setCenterBtn,
-	#createMarkerBtn {
+	#searchAreaBtn,
+    #clearCoordinatesBtn{
 		text-align: center;
 		margin: 5px;
 		padding: 10px 20px;
@@ -314,9 +488,8 @@ v		<p>Info: {selectedEventDetails.info}</p>
 
 	/* Hover effect */
 	#currentPositionBtn:hover,
-	#mapCenterBtn:hover,
-	#setCenterBtn:hover,
-	#createMarkerBtn:hover {
+	#searchAreaBtn:hover,
+    #clearCoordinatesBtn:hover{
 		background-color: #4aa0f7; /* Darker blue */
 	}
 
@@ -343,7 +516,7 @@ v		<p>Info: {selectedEventDetails.info}</p>
     display: block;
     margin: 0 auto;
     max-width: 100%;
-    border-radius: 8px;
+    border-radius: 5px;
     margin-bottom: 10px;
 }
 
@@ -380,40 +553,97 @@ v		<p>Info: {selectedEventDetails.info}</p>
 }
 
 
-/* Style the concert list */
-#concert-list {
-  margin-top: 45px;
-  padding: 10px;
-  border-radius: 2px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
-  width: 260px; /* Adjust the width as needed */
-  position: absolute;
-  right: 0;
-  top: 50px;
-  margin-right: 5px;
-  background-color: #fff;
-  
+#app-container {
+    display: flex;
+    height: 100vh; /* Use the full height of the viewport */
 }
 
-#concert-list ul {
-  padding: 0;
-  margin: 0;
-  list-style: none;
-  max-height: 530px;
-  overflow-y: auto;
-  border-top: 1px solid #ddd;
-  border-radius: 0 0 8px 8px;
-  font-size: 16px;
+#map-container {
+    flex-grow: 1; /* Allow the map to fill the remaining space */
 }
 
-/* Style the concert list header */
-#concert-list h2 {
-  text-align: center;
-  color: #252826;
-  font-family: 'Lato', sans-serif;
-  margin: 0;
-  padding: 10px;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+#sidebar-container {
+    display: none;
+    width: 300px; /* Set a fixed width for the sidebar */
+    overflow-y: auto; /* Add scroll for overflowing content */
+    background-color: white;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    padding: 20px; 
 }
+
+#concert-list-items {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    color: #656565;
+    margin-bottom: 10px; /* Adjust as needed */
+}
+
+#sidebar-container h2 {
+        color: #333;                  /* Change the text color */
+        font-size: 1.5em;             /* Set the font size */
+        margin: 0 0 20px 0;           /* Add some margin */
+        padding: 10px;                /* Add some padding */
+        border-bottom: 2px solid #eaeaea; /* Add a bottom border */
+        font-family: Roboto;
+        text-align: center;           /* Center the text */
+        /* Add additional styles as needed */
+    }
+
+
+/* Style for the directions container */
+#directions-container {
+    background-color: #f8f9fa; /* Light background color */
+    border: 1px solid #ced4da; /* Gray border */
+    border-radius: 8px; /* Rounded corners */
+    padding: 20px; /* Increased padding */
+    max-height: 400px; /* Increased maximum height */
+    overflow-y: auto; /* Enable scrolling */
+    transition: opacity 0.3s ease; /* Fade-in animation */
+    opacity: 0; /* Initially hidden */
+}
+
+/* Style for the travel distance */
+#travel-distance {
+    font-weight: bold;
+    text-align: center;
+    font-size: 1.2em;
+}
+
+/* Style for the travel duration */
+#travel-duration {
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Hover effect for the directions container */
+#directions-container:hover {
+    opacity: 1; /* Show container on hover */
+}
+
+/* Animation for expanding/collapsing directions container */
+@keyframes expandDown {
+    from {
+        max-height: 0;
+        opacity: 0;
+    }
+    to {
+        max-height: 400px;
+        opacity: 1;
+    }
+}
+
+/* Apply animation to directions container */
+#directions-container {
+    animation: expandDown 0.5s ease forwards; /* Animation on opening */
+}
+
+.greetings {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+    }
+
 </style>
