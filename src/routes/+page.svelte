@@ -425,8 +425,6 @@ function calculateAndDisplayRoute(origin, destination) {
     </div>
 {/if}
 
-
-
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
 
@@ -637,13 +635,5 @@ function calculateAndDisplayRoute(origin, destination) {
 #directions-container {
     animation: expandDown 0.5s ease forwards; /* Animation on opening */
 }
-
-.greetings {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 24px;
-    }
 
 </style>

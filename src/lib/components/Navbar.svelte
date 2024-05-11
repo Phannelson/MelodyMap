@@ -8,20 +8,17 @@
 
 <nav>
     <div class="wrapper">
-      <div class="logo"><enhanced:img id = "logoImg" src= "/static/whitelogo.png" alt="Logo"></div>
+      <div class="logo"><enhanced:img id = "logoImg" src= "/static/melody map logo.png" alt="Logo"></div>
       <input type="radio" name="slider" id="menu-btn">
       <input type="radio" name="slider" id="close-btn">
       <ul class="nav-links">
         <label for="close-btn" class="btn close-btn"><i class="fas fa-times"></i></label>
         <li><a href="/">Home</a></li>
-        <li><a href="/venues">Venues</a></li>
-        <li>
-          <a href="/concerts" class="desktop-item">Concerts</a>
-        </li>
         <li>
           <a href="/about" class="desktop-item">About</a>
-          <input type="checkbox" id="showDrop2">
-          <label for="showDrop2" class="mobile-item">Venues</label>
+        </li>
+        <li>
+          <a href="/account" class="desktop-item">Account</a>
         </li>
         <li><a href="/Login">Sign In/Register</a></li>
       </ul>
@@ -40,12 +37,31 @@
     font-weight: 400;
   }
 
+  @keyframes fadeLogo {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0.5;
+    }
+}
+
   #logoImg {
-    width: 120px; /* Adjust the width as needed */
+    width: 210px; /* Adjust the width as needed */
     height: auto; /* Maintain aspect ratio */
     margin-top: 38px;
-    margin-left: 30px;
+    margin-left: 10px;
+    animation: fadeLogo 3s infinite alternate;
   }
+
+  #logoImg:hover {
+    cursor: pointer;
+  }
+
+  #logoImg:active {
+    transform: scale(0.95);
+  }
+
 
   nav{
     /* Fixed Sidebar (stay in place on scroll and position relative to viewport) */
@@ -91,9 +107,7 @@
   .nav-links li a:hover{
     background: #3A3B3C;
   }
-  .nav-links .mobile-item{
-    display: none;
-  }
+
   .row .mega-links li a{
     padding: 0px;
     padding: 0 20px;
