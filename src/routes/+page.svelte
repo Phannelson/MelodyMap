@@ -178,31 +178,28 @@
 		
       const eventName = document.createElement('h2');
       eventName.textContent = event.name; // Set event name as text content
-
       concertItem.appendChild(eventName); // Add bold event name to li element
 
       const eventDetailDiv = document.createElement('div');
       eventDetailDiv.className = 'event-details';
 
       const startDate = document.createElement('p');
-      startDate.textContent = event.dates.start.localDate;
+      startDate.textContent = `Date: ${event.dates.start.localDate}`;
+      eventDetailDiv.appendChild(startDate);
 
       const venueName = document.createElement('p');
-      venueName.textContent = event._embedded.venues[0].name;
+      venueName.textContent = `Venue: ${event._embedded.venues[0].name}`;
+      eventDetailDiv.appendChild(venueName);
 
       const startDateTime = document.createElement('p');
-      startDateTime.textContent = event.dates.start.localTime;
+      startDateTime.textContent = `Time: ${event.dates.start.localTime}`;
+      eventDetailDiv.appendChild(startDateTime);
 
 	  const address = document.createElement('p');
-	  address.textContent = event._embedded.venues[0].address.line1;
-	  
-      eventDetailDiv.appendChild(startDate);
-      eventDetailDiv.appendChild(venueName);
-      eventDetailDiv.appendChild(startDateTime);
+	  address.textContent = `Address: ${event._embedded.venues[0].address.line1}`;
 	  eventDetailDiv.appendChild(address);
 
       concertItem.appendChild(eventDetailDiv);
-
       concertListElement.appendChild(concertItem);
       uniqueEventNames.add(event.name);
     }
@@ -419,5 +416,4 @@ v		<p>Info: {selectedEventDetails.info}</p>
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
-
 </style>
