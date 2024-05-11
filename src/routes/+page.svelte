@@ -1,5 +1,6 @@
 <script>
     import Navbar from '$lib/components/Navbar.svelte';
+    import Greetings from '$lib/components/Greetings.svelte';
     export let title = 'Melody Map';
 
     import { browser } from '$app/environment';
@@ -367,6 +368,7 @@ function calculateAndDisplayRoute(origin, destination) {
 }
 
 </script>
+<Greetings/>
 <Navbar />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -635,5 +637,13 @@ function calculateAndDisplayRoute(origin, destination) {
 #directions-container {
     animation: expandDown 0.5s ease forwards; /* Animation on opening */
 }
+
+.greetings {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+    }
 
 </style>
