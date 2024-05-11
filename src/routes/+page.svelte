@@ -5,12 +5,13 @@
 
     import { browser } from '$app/environment';
     import pkg from 'ngeohash';
+    import { onMount, onDestroy } from 'svelte';
+    import { writable } from 'svelte/store';
+
 	const { encode } = pkg;
 
     const PUBLIC_GOOGLE_MAPS_API_KEY = import.meta.env.VITE_PUBLIC_GOOGLE_MAPS_API_KEY;
     const TICKETMASTER_API_KEY = import.meta.env.VITE_TICKETMASTER_API_KEY;
-
-	
 
     let Map, Marker, InfoWindow;
     let map_object; // the Google Maps object
@@ -19,6 +20,15 @@
     let directionsService;
     let directionsRenderer;
 
+    let showLoadMoreButton = false; // Track when to show the button
+    let isLoading = false; // Track when data is being fetched
+    let currentPageUrl = writable(null); // Track the current page URL
+
+    export function loadMoreEvents() {
+    currentPageSize += 50;
+    fetchMusicEvents(lat, lng);
+}
+    
     const initialMapDisplayOptions = {
         zoom: 8,
         center: { lat: 35, lng: -110 },
@@ -101,19 +111,26 @@
         console.error('Error getting current position:', error);
     });
 }
-
+    let currentPageSize = 50;
     function fetchMusicEvents(latitude, longitude) {
         const geoHash = calculateGeoHash(latitude, longitude);
-        const concertEndpoint = `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${TICKETMASTER_API_KEY}&keyword=music&radius=50&locale=*&geoPoint=${geoHash}`;
+        const concertEndpoint = `https://app.ticketmaster.com/discovery/v2/events.json?apikey=${TICKETMASTER_API_KEY}&keyword=music&radius=50&locale=*&geoPoint=${geoHash}&size=${currentPageSize}`;
 
         fetch(concertEndpoint)
             .then(response => response.json())
             .then(data => {
                 processConcertData(data);
 				updateConcertList(data);
+                
+        // Check if there are more events to load
+        if (data._embedded.events.length < currentPageSize) {
+                showLoadMoreButton = false;
+            } else {
+                showLoadMoreButton = true;
+            }
             })
             .catch(error => {
-                console.error('Error fetching concert data:', error);
+                console.error('Error fetching music events:', error);
             });
     }
 
@@ -159,7 +176,6 @@
 
 		const info = document.createElement('p');
         info.textContent = event.info;
-
 
         infoWindowContent.appendChild(title);
         infoWindowContent.appendChild(startDate);
@@ -212,7 +228,6 @@
         });
     }
 
-    
 
     function processConcertData(data) {
         if (!data || !data._embedded || !data._embedded.events) {
@@ -267,6 +282,14 @@
             const address = document.createElement('p');
             address.textContent = `Address: ${event._embedded.venues[0].address.line1}`;
             eventDetailDiv.appendChild(address);
+
+            if (event.url) { // Check if the event.url property exists
+                const ticketLink = document.createElement('a');
+                ticketLink.href = event.url; // Set the URL for the ticket link
+                ticketLink.textContent = 'Tickets'; // Text displayed for the link
+                ticketLink.target = '_blank'; // Open link in a new tab
+                eventDetailDiv.appendChild(ticketLink);
+            }
 
             concertItem.appendChild(eventDetailDiv);
             concertListElement.appendChild(concertItem);
@@ -365,6 +388,17 @@ function calculateAndDisplayRoute(origin, destination) {
     });
 });
 
+// onMount(() => {
+//     loadMoreButton = document.getElementById('load-more-button');
+//     loadMoreButton.addEventListener('click', loadMoreEvents);
+// });
+
+// onDestroy(() => {
+//     if (loadMoreButton) {
+//         loadMoreButton.removeEventListener('click', loadMoreEvents);
+//     }
+// });
+
 }
 
 </script>
@@ -387,6 +421,7 @@ function calculateAndDisplayRoute(origin, destination) {
     <div id="sidebar-container">
         <h2>Concerts</h2>
         <ul id="concert-list-items"></ul>
+        <button id = "load-more-button" on:click={loadMoreEvents}>Load More</button>
     </div>
 </div>
 
@@ -421,11 +456,9 @@ function calculateAndDisplayRoute(origin, destination) {
             <p>Info: Unavailable</p>
         {/if}
         <img src={selectedEventDetails.images[0].url} alt={selectedEventDetails.name} style="width: 100%; max-width: 300px;">
-        <p><a href={selectedEventDetails.url} target="_blank">More Info</a></p>
+        <p><a href={selectedEventDetails.url} target="_blank">Tickets</a></p>
     </div>
 {/if}
-
-
 
 <style>
 	@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
@@ -638,12 +671,22 @@ function calculateAndDisplayRoute(origin, destination) {
     animation: expandDown 0.5s ease forwards; /* Animation on opening */
 }
 
-.greetings {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 24px;
-    }
+/* Style for the load more button */
+#load-more-button {
+    display: block;
+    margin: 0 auto;
+    padding: 10px 20px;
+    background-color: #61b0ff; /* Blue background */
+    color: white; /* White text color */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Change cursor to pointer */
+    transition: background-color 0.3s ease; /* Smooth transition */
+    margin-top: 10px; /* Add some top margin */
+}
 
+/* Hover effect for the load more button */
+#load-more-button:hover {
+    background-color: #4aa0f7; /* Darker blue */
+}
 </style>

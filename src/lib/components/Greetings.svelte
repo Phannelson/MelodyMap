@@ -1,15 +1,31 @@
 <script>
+    import { onMount, onDestroy } from 'svelte';
     import { goto } from '$app/navigation';
     import { fade } from 'svelte/transition';
     import { quintOut } from 'svelte/easing';
 
     let showGreetings = true;
+    let currentSection = 1;
+    let interval;
+
+    onMount(() => {
+        interval = setInterval(() => {
+            currentSection = currentSection === 2 ? 1 : currentSection + 1;
+            document.getElementById(`toggle${currentSection}`).checked = true;
+        }, 5000); // Rotate every 5 seconds
+    });
+
+    onDestroy(() => {
+        clearInterval(interval); // Clear the interval when the component is destroyed
+    });
 
     function handleExplore() {
         showGreetings = false;
         goto('/');
     }
 </script>
+
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Sans:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
@@ -28,7 +44,6 @@
                 </div>
                 <div class="info-container">
                   <h1>Welcome to Melody Map</h1>
-                  <label for="toggle2">Click</label>
                 </div>
               </section>
               <section id="section-2">
@@ -37,7 +52,6 @@
                 </div>
                 <div class="info-container">
                   <h1>Find concerts and venues near you</h1>
-                  <label for="toggle3">Click</label>
                 </div>
               </section>
             </div>
@@ -181,19 +195,6 @@ img {
   opacity: 0;
   transform: translateY(-2em);
   transition: all 1s 0.7s;
-}
-
-label {
-  display: block;
-  border: 2px solid white;
-  padding: 10px 20px;
-  border-radius: 25px;
-  cursor: pointer;
-}
-
-label:hover {
-  background-color: white;
-  color: #61b0ff;
 }
 
 #toggle2:checked ~ #section-2 {

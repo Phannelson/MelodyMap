@@ -9,6 +9,9 @@ This project is a web application that displays music concerts on a map and prov
 - Nelson Phan
 - Vivian Cao
 
+## Deployment
+Our web application is currently deployed at https://melody-map.vercel.app/
+
 ## Features
 
 - Display concerts on a map with markers.
