@@ -388,16 +388,44 @@ function calculateAndDisplayRoute(origin, destination) {
     });
 });
 
-// onMount(() => {
-//     loadMoreButton = document.getElementById('load-more-button');
-//     loadMoreButton.addEventListener('click', loadMoreEvents);
-// });
+let searchInput = null;
+let searchButton = null;
 
-// onDestroy(() => {
-//     if (loadMoreButton) {
-//         loadMoreButton.removeEventListener('click', loadMoreEvents);
-//     }
-// });
+onMount(() => {
+    searchInput = document.getElementById('search-input');
+    searchButton = document.getElementById('search-button');
+
+    searchInput.addEventListener('input', handleSearch);
+    searchButton.addEventListener('click', handleSearch);
+});
+
+onDestroy(() => {
+    if (searchInput) {
+        searchInput.removeEventListener('input', handleSearch);
+    }
+    if (searchButton) {
+        searchButton.removeEventListener('click', handleSearch);
+    }
+});
+
+function handleSearch() {
+    const searchTerm = searchInput.value.toLowerCase();
+    filterConcertList(searchTerm);
+}
+
+function filterConcertList(searchTerm) {
+    const concertListItems = document.querySelectorAll('.concert-item');
+    concertListItems.forEach(item => {
+        const eventName = item.querySelector('.event-name').textContent.toLowerCase();
+        const venueName = item.querySelector('p:nth-child(2)').textContent.toLowerCase();
+
+        if (eventName.includes(searchTerm) || venueName.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
 
 }
 
@@ -420,8 +448,12 @@ function calculateAndDisplayRoute(origin, destination) {
 
     <div id="sidebar-container">
         <h2>Concerts</h2>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search by concert or artist" />
+            <button id="search-button">Search</button>
+        </div>
         <ul id="concert-list-items"></ul>
-        <button id = "load-more-button" on:click={loadMoreEvents}>Load More</button>
+        <button id="load-more-button" on:click={loadMoreEvents}>Load More</button>
     </div>
 </div>
 
@@ -688,5 +720,26 @@ function calculateAndDisplayRoute(origin, destination) {
 /* Hover effect for the load more button */
 #load-more-button:hover {
     background-color: #4aa0f7; /* Darker blue */
+}
+
+/* Style for the search input */
+#search-input {
+    border: 1px solid #ccc; /* Add border */
+    border-radius: 4px; /* Rounded corners */
+    font-size: 12px; /* Set font size */
+    width: 65%; /* Set width */
+    margin-right: 10px; /* Add right margin */
+    padding: 6px; /* Add padding */
+}
+
+/* Style for the search button */
+#search-button {
+    padding: 6px 10px; /* Add padding */    
+    background-color: #61b0ff; /* Blue background */
+    color: white; /* White text color */
+    border: none; /* Remove border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Change cursor to pointer */
+    transition: background-color 0.3s ease; /* Smooth transition */
 }
 </style>
