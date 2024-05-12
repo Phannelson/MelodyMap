@@ -463,6 +463,17 @@ function filterConcertList(searchTerm) {
 <div id="app-container">
     <div id="map-container">
         <div id="map"></div>
+        <div id="coordinates-container">
+            <div class="input-container">
+                <label for="lat">Latitude:</label>
+                <input name="lat" type="text" bind:value={lat} />
+                <label for="lng">Longitude:</label>
+                <input name="lng" type="text" bind:value={lng} />
+            </div>
+            <button id="currentPositionBtn" on:click={get_current_position}>Get Current Position</button>
+            <button id="searchAreaBtn" on:click={onMapViewportChanged}>Search in this area</button>
+            <button id="clearCoordinatesBtn" on:click={clearCoordinates}>Clear Coordinates</button>
+        </div>
     </div>
 
     <div id="sidebar-container">
@@ -480,24 +491,11 @@ function filterConcertList(searchTerm) {
     </div>
 </div>
 
-	<div class="input-container">
-		<label for="lat">Latitude:</label>
-		<input name="lat" type="text" bind:value={lat} />
-		<label for="lng">Longitude:</label>
-		<input name="lng" type="text" bind:value={lng} />
-	</div>
-
-<button id="currentPositionBtn" on:click={get_current_position}>Get Current Position</button>
-<button id="searchAreaBtn" on:click={onMapViewportChanged}>Search in this area</button>
-<button id="clearCoordinatesBtn" on:click={clearCoordinates}>Clear Coordinates</button>
-
-
 <div id="directions-container" style="display: none;">
     <div id="travel-distance"></div>
     <div id="travel-duration"></div>
     <div id="directions-instructions"></div>
 </div>
-
 
 {#if selectedEventDetails}
     <div class="event-details">
@@ -523,41 +521,50 @@ function filterConcertList(searchTerm) {
     background-color: #f0f0f0; 
   }
 }
-	.input-container {
-        margin-bottom: 10px;
-    }
+#app-container {
+    display: flex;
+    height: 100vh; /* Use the full height of the viewport */
+}
 
-    .input-container label {
-        width: 60px;
-        text-align: right;
-        margin-bottom: 30px;
-    }
+#map-container {
+    flex-grow: 1; /* Allow the map to fill the remaining space */
+    position: relative; /* Make the container a positioning context */
+}
 
-    .input-container input {
-        flex: 1;
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 16px;
-		margin-right: 36px;
-        transform: translate(0%, 10%);
-    }
+#map {
+    height: 640px;
+    margin-right: 20px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
 
-    /* Optional: Style for labels */
-    .input-container label {
-        font-size: 16px;
-        color: #333;
-    }
-	
-    #map {
-        height: 640px;
-		margin-right: 20px;
-		border-radius: 10px;
-		margin-top: 10px;
-    }
-    #map-container {
-        width: 80%;
-		position: relative;
+#coordinates-container {
+    position: relative; /* Position the container absolutely */
+    bottom: 0; /* Position it at the bottom */
+    width: 100%; /* Make it span the full width */
+    padding: 10px 0; /* Add some padding */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.input-container {
+    margin-right: 20px;
+}
+
+.input-container label {
+    font-size: 16px;
+    color: #333;
+    margin-right: 10px;
+    margin-left: 15px;
+}
+
+.input-container input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
     }
 		/* Style the buttons */
 	#currentPositionBtn,
@@ -581,14 +588,20 @@ function filterConcertList(searchTerm) {
 		background-color: #4aa0f7; /* Darker blue */
 	}
 
+    #coordinates-container {
+    display: flex;
+    justify-content: center;
+}
+
     /* Container style */
 .event-details {
     /* border: 2px solid #BCD8C1; */
     border-radius: 5px;
     box-shadow: 0px 10px 12px rgba(0, 0, 0, 0.1);
-	position: absolute;
-	transform: translate(12%, 5%);
-	width: 1000px;
+	position: relative;
+	transform: translate(50%, 50%);
+    height: 80%;
+	width: 50%;
 	padding: 20px;
     background-color: #252826;
 }
@@ -643,11 +656,11 @@ function filterConcertList(searchTerm) {
 
 #app-container {
     display: flex;
-    height: 100vh; /* Use the full height of the viewport */
+    height: 80vh; /* Use the full height of the viewport */
 }
 
 #map-container {
-    flex-grow: 1; /* Allow the map to fill the remaining space */
+    flex-grow: 1;
 }
 
 #sidebar-container {
