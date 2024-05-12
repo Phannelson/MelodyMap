@@ -31,7 +31,7 @@ Our web application is currently deployed at https://melody-map.vercel.app/
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/concert-map.git](https://github.com/Phannelson/MelodyMap.git
+   git clone https://github.com/Phannelson/MelodyMap.git
    
 2. Navigate to the project directory:
    ```bash
