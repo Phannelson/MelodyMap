@@ -22,9 +22,10 @@ Our web application is currently deployed at https://melody-map.vercel.app/
 
 ## Technologies Used
 
-- HTML/CSS/JavaScript/SvelteKit
-- Google Maps API
-- Ticketmaster API
+[![Svelte](https://img.shields.io/badge/Svelte-4-orange)](https://svelte.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-v20-green)](https://nodejs.org/)
+[![Firebase](https://img.shields.io/badge/Firebase-deployed-yellow)](https://firebase.google.com/)
+
 
 ## Setup
 
