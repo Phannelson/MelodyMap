@@ -538,33 +538,23 @@ function filterConcertList(searchTerm) {
     margin-top: 10px;
 }
 
-#coordinates-container {
-    position: relative; /* Position the container absolutely */
-    bottom: 0; /* Position it at the bottom */
-    width: 100%; /* Make it span the full width */
-    padding: 10px 0; /* Add some padding */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
 
 .input-container {
-    margin-right: 20px;
+    margin-right: 20px; 
 }
 
 .input-container label {
     font-size: 16px;
     color: #333;
-    margin-right: 10px;
-    margin-left: 15px;
+    margin-right: 5px;
 }
 
 .input-container input {
-    flex: 1;
-    padding: 8px;
+    flex: 1; 
+    padding: 6px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 16px;
+    font-size: 12px;
     }
 		/* Style the buttons */
 	#currentPositionBtn,
@@ -572,13 +562,16 @@ function filterConcertList(searchTerm) {
     #clearCoordinatesBtn{
 		text-align: center;
 		margin: 5px;
-		padding: 10px 20px;
+		padding: 4px 20px;
 		background-color: #61b0ff; /* Blue background */
 		color: white;
 		border: none;
 		cursor: pointer;
 		border-radius: 5px;
+        font: 6px;
 		transition: background-color 0.3s ease;
+        margin-left: 10px;  
+        
 	}
 
 	/* Hover effect */
@@ -591,6 +584,12 @@ function filterConcertList(searchTerm) {
     #coordinates-container {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
+    position: relative; /* Position the container absolutely */
+    bottom: 0; /* Position it at the bottom */
+    width: 100%; /* Make it span the full width */
+    padding: 10px 0; /* Add some padding */
+    align-items: center;
 }
 
     /* Container style */
@@ -656,11 +655,7 @@ function filterConcertList(searchTerm) {
 
 #app-container {
     display: flex;
-    height: 80vh; /* Use the full height of the viewport */
-}
-
-#map-container {
-    flex-grow: 1;
+    height: 70vh; /* Use the full height of the viewport */
 }
 
 #sidebar-container {
@@ -670,6 +665,7 @@ function filterConcertList(searchTerm) {
     background-color: white;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
     padding: 20px; 
+    height: 90vh;
 }
 
 #concert-list-items {
@@ -697,11 +693,14 @@ function filterConcertList(searchTerm) {
     background-color: #f8f9fa; /* Light background color */
     border: 1px solid #ced4da; /* Gray border */
     border-radius: 8px; /* Rounded corners */
-    padding: 20px; /* Increased padding */
-    max-height: 400px; /* Increased maximum height */
+    padding: 10px; /* Increased padding */
+    max-height: 4   00px; /* Increased maximum height */
     overflow-y: auto; /* Enable scrolling */
     transition: opacity 0.3s ease; /* Fade-in animation */
     opacity: 0; /* Initially hidden */
+    margin: 20px 0; /* Add some margin */
+    align-items: flex-end;
+
 }
 
 /* Style for the travel distance */
@@ -715,11 +714,6 @@ function filterConcertList(searchTerm) {
 #travel-duration {
     font-weight: bold;
     text-align: center;
-}
-
-/* Hover effect for the directions container */
-#directions-container:hover {
-    opacity: 1; /* Show container on hover */
 }
 
 /* Animation for expanding/collapsing directions container */
