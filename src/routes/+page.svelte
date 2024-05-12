@@ -251,8 +251,21 @@
         concertListElement.innerHTML = ''; // Clear previous list
 
         const uniqueEventNames = new Set();
+        const searchType = document.getElementById('search-type').value;
+        const searchInput = document.getElementById('search-input').value.toLowerCase();
+
+        // Sort the events by start date in ascending order
+        data._embedded.events.sort((a, b) => {
+            const dateA = new Date(a.dates.start.localDate);
+            const dateB = new Date(b.dates.start.localDate);
+            return dateA - dateB;
+        });
 
         data._embedded.events.forEach((event, index) => {
+
+            const eventName = event.name.toLowerCase();
+            const venueName = event._embedded.venues[0].name.toLowerCase();
+            
             if (!uniqueEventNames.has(event.name)) {
             const concertItem = document.createElement('li');
             concertItem.className = 'concert-item';
@@ -288,6 +301,12 @@
                 ticketLink.href = event.url; // Set the URL for the ticket link
                 ticketLink.textContent = 'Tickets'; // Text displayed for the link
                 ticketLink.target = '_blank'; // Open link in a new tab
+                ticketLink.style.background = '#61b0ff';
+                ticketLink.style.color = 'white';
+                ticketLink.style.border = 'none';
+                ticketLink.style.padding = '10px 20px';
+                ticketLink.style.borderRadius = '5px';
+                ticketLink.style.cursor = 'pointer';
                 eventDetailDiv.appendChild(ticketLink);
             }
 
@@ -449,6 +468,10 @@ function filterConcertList(searchTerm) {
     <div id="sidebar-container">
         <h2>Concerts</h2>
         <div class="search-container">
+            <select id="search-type">
+                <option value="artist">Artist</option>
+                <option value="venue">Venue</option>
+            </select>
             <input type="text" id="search-input" placeholder="Search by concert or artist" />
             <button id="search-button">Search</button>
         </div>
@@ -714,7 +737,7 @@ function filterConcertList(searchTerm) {
     border-radius: 5px; /* Rounded corners */
     cursor: pointer; /* Change cursor to pointer */
     transition: background-color 0.3s ease; /* Smooth transition */
-    margin-top: 10px; /* Add some top margin */
+    margin-top: 30px; /* Add some top margin */
 }
 
 /* Hover effect for the load more button */
@@ -726,10 +749,10 @@ function filterConcertList(searchTerm) {
 #search-input {
     border: 1px solid #ccc; /* Add border */
     border-radius: 4px; /* Rounded corners */
-    font-size: 12px; /* Set font size */
+    font-size: 9px; /* Set font size */
     width: 65%; /* Set width */
     margin-right: 10px; /* Add right margin */
-    padding: 6px; /* Add padding */
+    padding: 8px; /* Add padding */
 }
 
 /* Style for the search button */
@@ -742,4 +765,26 @@ function filterConcertList(searchTerm) {
     cursor: pointer; /* Change cursor to pointer */
     transition: background-color 0.3s ease; /* Smooth transition */
 }
+
+/* Hover effect for the search button */
+#search-button:hover {
+    background-color: #4aa0f7; /* Darker blue */
+}
+
+/* Style for the search container */
+.search-container {
+    display: flex; /* Use flexbox */
+    align-items: center; /* Center vertically */
+    margin-bottom: 20px; /* Add bottom margin */
+}
+
+/* Style for the search type select */
+#search-type {
+    border: 1px solid #ccc; /* Add border */
+    border-radius: 4px; /* Rounded corners */
+    font-size: 9px; /* Set font size */
+    padding: 6px; /* Add padding */
+    margin-right: 10px; /* Add right margin */
+}
+
 </style>
