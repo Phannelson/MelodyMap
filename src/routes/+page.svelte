@@ -6,7 +6,7 @@
     import { browser } from '$app/environment';
     import pkg from 'ngeohash';
     import { onMount, onDestroy } from 'svelte';
-    import { writable } from 'svelte/store';
+    import { get, writable } from 'svelte/store';
 
 	const { encode } = pkg;
 
@@ -25,9 +25,15 @@
     let currentPageUrl = writable(null); // Track the current page URL
 
     export function loadMoreEvents() {
-    currentPageSize += 50;
-    fetchMusicEvents(lat, lng);
-}
+        currentPageSize += 50;
+        fetchMusicEvents(lat, lng);
+    }
+
+    let isVisible = true; // Initially visible
+    export function handleClose() {
+        isVisible = false; // Hide the directions container
+        }
+
     
     const initialMapDisplayOptions = {
         zoom: 8,
@@ -65,6 +71,8 @@
 
         map_object = new Map(map_element, initialMapDisplayOptions);
         directionsRenderer.setMap(map_object);
+
+        get_current_position();
     }
 
     function onMapViewportChanged() {
@@ -390,23 +398,6 @@ function calculateAndDisplayRoute(origin, destination) {
         }
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
-    const directionsContainer = document.getElementById('directions-container');
-    const getDirectionsBtn = document.getElementById('getDirectionsBtn');
-
-    // Hide the directions container by default
-    directionsContainer.style.display = 'none';
-
-    getDirectionsBtn.addEventListener('click', function() {
-        // Toggle the visibility of the directions container
-        if (directionsContainer.style.display === 'none') {
-            directionsContainer.style.display = 'block';
-        } else {
-            directionsContainer.style.display = 'none';
-        }
-    });
-});
-
 let searchInput = null;
 let searchButton = null;
 
@@ -446,7 +437,9 @@ function filterConcertList(searchTerm) {
     });
 }
 
+
 }
+
 
 </script>
 <Greetings/>
@@ -491,11 +484,16 @@ function filterConcertList(searchTerm) {
     </div>
 </div>
 
+{#if isVisible}
 <div id="directions-container" style="display: none;">
-    <div id="travel-distance"></div>
-    <div id="travel-duration"></div>
-    <div id="directions-instructions"></div>
-</div>
+    <button class="close-btn" on:click={handleClose}>&times;</button>
+        <div id="travel-distance"></div>
+        <div id="travel-duration"></div>
+        <div id="directions-instructions"></div>
+    </div>
+{/if}
+
+
 
 {#if selectedEventDetails}
     <div class="event-details">
@@ -562,7 +560,7 @@ function filterConcertList(searchTerm) {
     #clearCoordinatesBtn{
 		text-align: center;
 		margin: 5px;
-		padding: 4px 20px;
+		padding: 8px 20px;
 		background-color: #61b0ff; /* Blue background */
 		color: white;
 		border: none;
@@ -598,11 +596,12 @@ function filterConcertList(searchTerm) {
     border-radius: 5px;
     box-shadow: 0px 10px 12px rgba(0, 0, 0, 0.1);
 	position: relative;
-	transform: translate(50%, 50%);
+	transform: translate(50%, 0%);
     height: 80%;
 	width: 50%;
 	padding: 20px;
     background-color: #252826;
+    margin-top: 10px;
 }
 
 /* Center align all text content */
@@ -693,13 +692,17 @@ function filterConcertList(searchTerm) {
     background-color: #f8f9fa; /* Light background color */
     border: 1px solid #ced4da; /* Gray border */
     border-radius: 8px; /* Rounded corners */
-    padding: 10px; /* Increased padding */
-    max-height: 4   00px; /* Increased maximum height */
+    padding: 14px; /* Increased padding */
+    max-height: 400px; /* Increased maximum height */
+    width: 40%; /* Set width */
     overflow-y: auto; /* Enable scrolling */
     transition: opacity 0.3s ease; /* Fade-in animation */
     opacity: 0; /* Initially hidden */
     margin: 20px 0; /* Add some margin */
-    align-items: flex-end;
+    position: absolute; /* Position absolutely */
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%); /* Center the container */
 
 }
 
@@ -792,6 +795,14 @@ function filterConcertList(searchTerm) {
     font-size: 9px; /* Set font size */
     padding: 6px; /* Add padding */
     margin-right: 10px; /* Add right margin */
+}
+
+.close-btn {
+    background-color: transparent;
+    color: #181818;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
 }
 
 </style>
